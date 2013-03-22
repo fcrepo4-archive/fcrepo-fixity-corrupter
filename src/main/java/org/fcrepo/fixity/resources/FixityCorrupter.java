@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import javax.inject.Inject;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -30,10 +32,13 @@ public class FixityCorrupter {
 
 	private static final Logger logger = LoggerFactory.getLogger(FixityCorrupter.class);
 
+    @Inject
+    private ObjectService objectService;
+
 	@GET
 	@Path("{pid}/{dsId}/{num}")
 	public Response corruptDatastreams(@PathParam("pid") final String pid, @PathParam("dsId") final String dsId, @DefaultValue("-1") @PathParam("num") int numCorrupt) throws RepositoryException, IOException {
-		final FedoraObject fo = ObjectService.getObject(pid);
+		final FedoraObject fo = objectService.getObject(pid);
 		NodeIterator streams = fo.getNode().getNodes();
 		final Random rnd = new Random();
 		while (streams.hasNext()){
