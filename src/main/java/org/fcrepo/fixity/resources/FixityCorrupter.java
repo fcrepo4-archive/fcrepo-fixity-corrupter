@@ -8,7 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
@@ -19,7 +19,9 @@ import org.fcrepo.services.ObjectService;
 import org.fcrepo.utils.LowLevelCacheEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 @Path("/fixity-corrupter")
 public class FixityCorrupter extends AbstractResource{
 
@@ -31,9 +33,10 @@ public class FixityCorrupter extends AbstractResource{
     @Inject
     private LowLevelStorageService llstorage;
 
-	@GET
-	@Path("/{path: .*}/{numCorrupt}")
-	public Response corruptDatastream(@PathParam("path") final String path, @PathParam("numCorrupt") int numCorrupt) throws RepositoryException, IOException {
+	@POST
+	@Path("/{path}")
+	public Response corruptDatastream(@PathParam("path") final String path) throws RepositoryException, IOException {
+	    int numCorrupt = 1;
 
 	    final Set<LowLevelCacheEntry> cacheEntries = this.llstorage.getLowLevelCacheEntries(objects.getObjectNode(getAuthenticatedSession(),path));
 
