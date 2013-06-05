@@ -2,64 +2,55 @@ package org.fcrepo.fixity.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import javax.inject.Inject;
-
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
-import org.fcrepo.FedoraObject;
+import org.fcrepo.AbstractResource;
 import org.fcrepo.services.LowLevelStorageService;
 import org.fcrepo.services.ObjectService;
 import org.fcrepo.utils.LowLevelCacheEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/")
-public class FixityCorrupter {
+@Path("/fixity-corrupter")
+public class FixityCorrupter extends AbstractResource{
 
 	private static final Logger logger = LoggerFactory.getLogger(FixityCorrupter.class);
 
     @Inject
-    private ObjectService objectService;
+    private ObjectService objects;
+
+    @Inject
+    private LowLevelStorageService llstorage;
 
 	@GET
-	@Path("{pid}/{dsId}/{num}")
-	public Response corruptDatastreams(@PathParam("pid") final String pid, @PathParam("dsId") final String dsId, @DefaultValue("-1") @PathParam("num") int numCorrupt) throws RepositoryException, IOException {
-		final FedoraObject fo = objectService.getObject(pid);
-		NodeIterator streams = fo.getNode().getNodes();
-		final Random rnd = new Random();
-		while (streams.hasNext()){
-			Node ds = (Node) streams.next();
-			if (!ds.getName().equals(dsId)){
-				continue;
-			}
-			Iterator<Entry<LowLevelCacheEntry,InputStream>> blobs = LowLevelStorageService.getBinaryBlobs(ds).entrySet().iterator();
-			while (blobs.hasNext()){
-				if (numCorrupt-- == 0){
-					/* enough mayhem by user request */
-					return Response.ok().build();
-				}
-				Entry<LowLevelCacheEntry,InputStream> blob = blobs.next();
-				byte[] corrupted = new byte[4096];
-				rnd.nextBytes(corrupted);
-				logger.debug("corrupting " + ds.getName() + " instance: " + blob.getKey());
-				ByteArrayInputStream in = new ByteArrayInputStream(corrupted);
-				blob.getKey().storeValue(in);
-			}
-		}
+	@Path("/{path: .*}/{numCorrupt}")
+	public Response corruptDatastream(@PathParam("path") final String path, @PathParam("numCorrupt") int numCorrupt) throws RepositoryException, IOException {
+
+	    final Set<LowLevelCacheEntry> cacheEntries = this.llstorage.getLowLevelCacheEntries(objects.getObjectNode(getAuthenticatedSession(),path));
+
+	    /* iterate over all the lowlevel cacheentries until numCorrupt reaches 0 */
+	    for (Iterator<LowLevelCacheEntry> entryIterator = cacheEntries.iterator();entryIterator.hasNext();){
+	        if (numCorrupt-- <= 0) {
+	            break;
+	        }
+	        LowLevelCacheEntry entry = entryIterator.next();
+            byte[] corrupted = new byte[4096];
+            new Random().nextBytes(corrupted);
+            logger.debug("corrupting " + path + " instance: " + entry.getExternalId());
+            ByteArrayInputStream src = new ByteArrayInputStream(corrupted);
+            entry.storeValue(src);
+	    }
+
 		return Response.ok().build();
 	}
+
 }

@@ -15,5 +15,11 @@
   		<version>4.0-SNAPSHOT</version>
   		<type>jar</type>
   	</dependency>
-  </dependencies>
+  	<dependency>
+  		<groupId>org.fcrepo</groupId>
+  		<artifactId>fcrepo-http-commons</artifactId>
+  		<version>4.0-SNAPSHOT</version>
+  		<type>jar</type>
+  	</dependency>
+  	</dependencies>
 </project>
