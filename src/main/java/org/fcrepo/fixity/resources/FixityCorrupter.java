@@ -40,17 +40,26 @@ public class FixityCorrupter extends AbstractResource {
     @Inject
     private LowLevelStorageService llstorage;
 
+    /**
+     * TODO
+     * 
+     * @param path
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
     @POST
     @Path("/{path}")
-    public Response corruptDatastream(@PathParam("path")
-    final String path) throws RepositoryException, IOException {
+    public Response corruptDatastream(
+            @PathParam("path")
+            final String path) throws RepositoryException, IOException {
         int numCorrupt = 1;
 
         final Set<LowLevelCacheEntry> cacheEntries =
                 this.llstorage.getLowLevelCacheEntries(objects.getObjectNode(
                         session, path));
 
-        /* iterate over all the lowlevel cacheentries until numCorrupt reaches 0 */
+        /* iterate over all lowlevel cacheentries until numCorrupt reaches 0 */
         for (Iterator<LowLevelCacheEntry> entryIterator =
                 cacheEntries.iterator(); entryIterator.hasNext();) {
             if (numCorrupt-- <= 0) {
