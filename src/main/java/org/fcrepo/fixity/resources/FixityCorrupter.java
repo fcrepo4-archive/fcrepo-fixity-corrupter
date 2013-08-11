@@ -30,11 +30,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-import org.fcrepo.AbstractResource;
-import org.fcrepo.services.LowLevelStorageService;
-import org.fcrepo.services.ObjectService;
-import org.fcrepo.session.InjectedSession;
-import org.fcrepo.utils.LowLevelCacheEntry;
+import org.fcrepo.http.commons.AbstractResource;
+import org.fcrepo.http.commons.session.InjectedSession;
+import org.fcrepo.kernel.services.LowLevelStorageService;
+import org.fcrepo.kernel.services.ObjectService;
+import org.fcrepo.kernel.utils.LowLevelCacheEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
